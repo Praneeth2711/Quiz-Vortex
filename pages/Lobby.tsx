@@ -52,7 +52,7 @@ const Lobby: React.FC<LobbyProps> = ({ user }) => {
     e.preventDefault();
     // In a real app, this would hit an API. Here we redirect to a mock ID.
     const mockId = `new_node_${Date.now()}`;
-    navigate(`/room/${mockId}`);
+    navigate(`/room/${mockId}?category=${encodeURIComponent(roomCategory)}`);
   };
 
   return (
@@ -117,7 +117,7 @@ const Lobby: React.FC<LobbyProps> = ({ user }) => {
               damping: 15
             }}
             whileHover={{ y: -15, scale: 1.08 }}
-            onClick={() => navigate(`/room/${room.id}`)}
+            onClick={() => navigate(`/room/${room.id}?category=${encodeURIComponent(room.category)}`)}
             className="group relative glass rounded-[40px] border border-white/5 p-8 cursor-pointer overflow-hidden transition-all hover:bg-indigo-500/[0.05] hover:border-indigo-500/30 before:absolute before:inset-0 before:bg-gradient-to-r before:from-indigo-600/0 before:via-indigo-600/10 before:to-indigo-600/0 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
           >
             {/* Background Glow Effect */}

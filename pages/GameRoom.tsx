@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameStatus, User, Player, Question, ChatMessage } from '../types';
 import { MOCK_QUESTIONS, POWER_UPS } from '../constants';
@@ -14,6 +14,8 @@ interface GameRoomProps {
 const GameRoom: React.FC<GameRoomProps> = ({ user, updateCoins }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get('category') || 'Science'; // default to Science
 
   const [status, setStatus] = useState<GameStatus>(GameStatus.LOBBY);
   const [timer, setTimer] = useState(10);
@@ -26,8 +28,16 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, updateCoins }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [hasPowerUpUsed, setHasPowerUpUsed] = useState<string | null>(null);
   const [reactions, setReactions] = useState<{id: number, emoji: string, x: number}[]>([]);
+  const [gameQuestions, setGameQuestions] = useState<Question[]>([]);
 
-  const currentQuestion = MOCK_QUESTIONS[currentQuestionIndex];
+  // Initialize game questions based on category
+  useEffect(() => {
+    const categoryQuestions = MOCK_QUESTIONS.filter(q => q.category === category);
+    const shuffledQuestions = [...categoryQuestions].sort(() => Math.random() - 0.5);
+    setGameQuestions(shuffledQuestions.slice(0, 5));
+  }, [category]);
+
+  const currentQuestion = gameQuestions[currentQuestionIndex];
 
   useEffect(() => {
     let interval: any;
@@ -45,15 +55,15 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, updateCoins }) => {
       setTimer(5);
     } else if (status === GameStatus.STARTING) {
       setStatus(GameStatus.QUESTION);
-      setTimer(15);
+      setTimer(20);
     } else if (status === GameStatus.QUESTION) {
       setStatus(GameStatus.RESULT);
       setTimer(5);
     } else if (status === GameStatus.RESULT) {
-      if (currentQuestionIndex < MOCK_QUESTIONS.length - 1) {
+      if (currentQuestionIndex < gameQuestions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
         setStatus(GameStatus.QUESTION);
-        setTimer(15);
+        setTimer(20);
         setSelectedAnswer(null);
         setHasPowerUpUsed(null);
       } else {
